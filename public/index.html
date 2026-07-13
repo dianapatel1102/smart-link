@@ -1,153 +1,631 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Link Shortener</title>
+    <title>SmartLinks Pro - URL Shortener & Analytics</title>
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:Arial;background:linear-gradient(135deg,#667eea,#764ba2);min-height:100vh;padding:20px}
-        .container{max-width:550px;margin:0 auto}
-        .card{background:white;border-radius:20px;padding:25px;box-shadow:0 10px 40px rgba(0,0,0,0.3);margin-bottom:20px}
-        h1{text-align:center;color:#333;font-size:1.3em;margin-bottom:5px}
-        h2{color:#333;font-size:1.1em;margin-bottom:15px}
-        .subtitle{text-align:center;color:#666;margin-bottom:20px;font-size:13px}
-        .input-group{margin-bottom:12px}
-        label{display:block;margin-bottom:5px;font-weight:bold;font-size:13px;color:#555}
-        input{width:100%;padding:12px;border:2px solid #e0e0e0;border-radius:10px;font-size:14px}
-        button{width:100%;padding:14px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;border-radius:12px;font-size:16px;font-weight:bold;cursor:pointer;margin-top:8px}
-        .result{background:#f0f8ff;border:2px solid #667eea;border-radius:15px;padding:20px;margin-top:20px;display:none}
-        .result.show{display:block}
-        .short-url{background:white;padding:12px;border-radius:8px;font-size:15px;color:#667eea;word-break:break-all;margin:10px 0;text-align:center;font-weight:bold}
-        .copy-btn{background:#28a745;width:48%}
-        .del-btn{background:#ff4757;width:48%}
-        .btn-row{display:flex;gap:4%;margin-top:10px}
-        .badge{display:inline-block;padding:4px 10px;border-radius:15px;font-size:10px;margin:2px}
-        .badge.success{background:#d4edda;color:#155724}
-        .badge.danger{background:#f8d7da;color:#721c24}
-        .link-card{background:#f8f9fa;padding:12px;border-radius:10px;margin:8px 0;font-size:12px}
-        .link-card .code{font-weight:bold;color:#667eea;font-size:14px}
-        .link-card .stats{display:flex;gap:10px;margin-top:5px}
-        .logout-btn{background:#666;margin-top:5px}
-        .tab-btn{background:#f0f0f0;color:#333;margin-top:5px}
-        .user-info{text-align:center;color:#28a745;font-size:12px;margin-bottom:10px}
+        :root {
+            --primary: #4F46E5;
+            --primary-light: #818CF8;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --dark: #1F2937;
+            --gray: #6B7280;
+            --light: #F3F4F6;
+            --white: #FFFFFF;
+            --radius: 16px;
+            --shadow: 0 4px 24px rgba(0,0,0,0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F0F2F5;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 16px 24px;
+            box-shadow: var(--shadow);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-size: 1.4em;
+            font-weight: 800;
+            color: var(--primary);
+        }
+        .logo span { color: var(--dark); }
+        .user-menu {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        
+        /* Container */
+        .container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 20px;
+        }
+        
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+        .card-header {
+            font-size: 1.2em;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        
+        /* Stat Cards */
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        .stat-card:hover { border-color: var(--primary-light); transform: translateY(-2px); }
+        .stat-icon { font-size: 2em; margin-bottom: 8px; }
+        .stat-value { font-size: 2.2em; font-weight: 800; color: var(--dark); }
+        .stat-label { font-size: 0.85em; color: var(--gray); margin-top: 4px; }
+        .stat-change { font-size: 0.8em; margin-top: 4px; }
+        .stat-change.up { color: var(--success); }
+        .stat-change.down { color: var(--danger); }
+        
+        /* Input */
+        .input-group { margin-bottom: 16px; }
+        .input-group label {
+            display: block;
+            font-weight: 600;
+            font-size: 0.9em;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #E5E7EB;
+            border-radius: 12px;
+            font-size: 15px;
+            transition: all 0.3s;
+        }
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-primary { background: var(--primary); color: white; width: 100%; justify-content: center; }
+        .btn-primary:hover { background: #4338CA; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-outline { background: white; color: var(--primary); border: 2px solid var(--primary); }
+        .btn-sm { padding: 8px 16px; font-size: 13px; border-radius: 8px; }
+        
+        /* Table */
+        .table-container { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
+            text-align: left;
+            padding: 12px 16px;
+            background: var(--light);
+            font-size: 0.85em;
+            color: var(--gray);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #F3F4F6;
+            font-size: 0.9em;
+        }
+        tr:hover { background: #FAFAFA; }
+        
+        /* Badge */
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .badge-success { background: #D1FAE5; color: #065F46; }
+        .badge-danger { background: #FEE2E2; color: #991B1B; }
+        .badge-warning { background: #FEF3C7; color: #92400E; }
+        .badge-info { background: #DBEAFE; color: #1E40AF; }
+        
+        /* Progress Bar */
+        .progress-bar {
+            height: 8px;
+            background: #E5E7EB;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 6px;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--light);
+            padding: 4px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            border: none;
+            background: transparent;
+            color: var(--gray);
+        }
+        .tab.active {
+            background: var(--white);
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+        
+        /* Copy Input */
+        .copy-row {
+            display: flex;
+            gap: 8px;
+        }
+        .copy-row input {
+            flex: 1;
+            background: var(--light);
+            border: 2px solid #E5E7EB;
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 14px;
+        }
+        
+        /* Chart placeholder */
+        .chart-placeholder {
+            background: var(--light);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            color: var(--gray);
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9em;
+        }
+        
+        .bar-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 100px;
+            padding: 10px 0;
+        }
+        .bar {
+            flex: 1;
+            background: var(--primary-light);
+            border-radius: 4px 4px 0 0;
+            min-width: 20px;
+            transition: height 0.5s;
+            position: relative;
+        }
+        .bar:hover { background: var(--primary); }
+        .bar-label {
+            position: absolute;
+            bottom: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.65em;
+            color: var(--gray);
+        }
+        
+        .hidden { display: none !important; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+            .header { padding: 12px 16px; }
+            .logo { font-size: 1.1em; }
+            .container { padding: 0 12px; margin: 12px auto; }
+        }
     </style>
 </head>
 <body>
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="logo">🔗 Smart<span>Links</span> <span style="font-size:0.5em;color:var(--success);">PRO</span></div>
+        <div class="user-menu" id="userMenu" style="display:none">
+            <span style="font-weight:600;font-size:0.9em;color:var(--dark)" id="headerUser"></span>
+            <div class="user-avatar" id="headerAvatar">A</div>
+            <button class="btn btn-outline btn-sm" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
     <div class="container">
         
-        <!-- LOGIN PAGE -->
-        <div class="card" id="loginPage">
-            <h1>🔐 Login</h1>
-            <p class="subtitle">Smart Link Shortener</p>
-            <div class="input-group"><label>Username:</label><input type="text" id="loginUser" placeholder="Enter username"></div>
-            <div class="input-group"><label>Password:</label><input type="password" id="loginPass" placeholder="Enter password"></div>
-            <button onclick="login()">🔓 Login</button>
-            <button class="tab-btn" onclick="showRegister()">🆕 Register New Account</button>
-            <p style="text-align:center;margin-top:10px;font-size:11px;color:#999">Default: admin / admin123</p>
-        </div>
-        
-        <!-- REGISTER PAGE -->
-        <div class="card" id="regPage" style="display:none">
-            <h1>🆕 Register</h1>
-            <div class="input-group"><label>Username (min 3):</label><input type="text" id="regUser" placeholder="Choose username"></div>
-            <div class="input-group"><label>Password (min 4):</label><input type="password" id="regPass" placeholder="Choose password"></div>
-            <button onclick="register()">✅ Register</button>
-            <button class="tab-btn" onclick="showLogin()">🔙 Back to Login</button>
-        </div>
-        
-        <!-- MAIN PAGE -->
-        <div class="card" id="mainPage" style="display:none">
-            <p class="user-info">👤 Logged in as: <b id="currentUser"></b></p>
-            <h1>🎯 Short Link Banaye</h1>
-            <div class="input-group"><label>💰 Offer Page URL:</label><input type="url" id="offerUrl" placeholder="https://your-offer-link.com"></div>
-            <div class="input-group"><label>✏️ Custom Alias:</label><input type="text" id="alias" placeholder="Optional"></div>
-            <div style="background:#f8f9fa;border-radius:12px;padding:12px;margin:12px 0;text-align:center;font-size:12px">👤 Human → Offer &nbsp;|&nbsp; 🤖 Bot → Safe Page</div>
-            <button onclick="createLink()">🚀 Short Link Banaye</button>
-            <div class="result" id="result">
-                <h3 style="color:#28a745;font-size:14px">✅ Link Ready!</h3>
-                <div class="short-url" id="shortUrl"></div>
-                <span class="badge success">👤 Offer</span><span class="badge danger">🤖 Safe</span>
-                <div class="btn-row"><button class="copy-btn" onclick="copyLink()">📋 Copy</button><button class="del-btn" onclick="deleteLink()">🗑️ Delete</button></div>
+        <!-- LOGIN -->
+        <div id="authPage" style="max-width:420px;margin:60px auto;">
+            <div class="card" id="loginCard">
+                <div class="card-header">🔐 Welcome Back</div>
+                <div class="input-group"><label>Username</label><input type="text" id="loginUser" placeholder="Enter username"></div>
+                <div class="input-group"><label>Password</label><input type="password" id="loginPass" placeholder="Enter password"></div>
+                <button class="btn btn-primary" onclick="login()">Sign In</button>
+                <p style="text-align:center;margin-top:12px;font-size:0.85em;color:var(--gray)">Default: admin / admin123</p>
+                <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="toggleAuth()">Create New Account</button>
             </div>
-            <button class="tab-btn" onclick="loadMyLinks()">📊 My Links & Stats</button>
-            <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+            <div class="card hidden" id="regCard">
+                <div class="card-header">🆕 Create Account</div>
+                <div class="input-group"><label>Username (min 3 chars)</label><input type="text" id="regUser" placeholder="Choose username"></div>
+                <div class="input-group"><label>Password (min 4 chars)</label><input type="password" id="regPass" placeholder="Choose password"></div>
+                <button class="btn btn-primary" onclick="register()">Register</button>
+                <button class="btn btn-outline" style="width:100%;margin-top:8px" onclick="toggleAuth()">Back to Login</button>
+            </div>
         </div>
         
-        <!-- MY LINKS PAGE -->
-        <div class="card" id="linksPage" style="display:none">
-            <h2>📊 My Links</h2>
-            <div id="linksList"></div>
-            <button class="tab-btn" onclick="showMain()">🔙 Back</button>
+        <!-- DASHBOARD -->
+        <div id="dashPage" class="hidden">
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('create')">➕ Create Link</button>
+                <button class="tab" onclick="switchTab('links')">📋 My Links</button>
+                <button class="tab" onclick="switchTab('analytics')">📊 Analytics</button>
+            </div>
+            
+            <!-- CREATE TAB -->
+            <div id="createTab">
+                <div class="card">
+                    <div class="card-header">🎯 Create New Short Link</div>
+                    <div class="input-group"><label>Destination URL (Offer Page)</label><input type="url" id="offerUrl" placeholder="https://your-offer-page.com"></div>
+                    <div class="input-group"><label>Custom Back-half (Optional)</label><input type="text" id="alias" placeholder="my-offer (leave empty for auto)"></div>
+                    <div style="background:var(--light);border-radius:12px;padding:16px;margin:16px 0;display:flex;justify-content:space-around;text-align:center;font-size:0.9em">
+                        <div>👤 <b>Human</b><br><small style="color:var(--success)">→ Offer Page</small></div>
+                        <div style="color:var(--gray)">VS</div>
+                        <div>🤖 <b>Bot</b><br><small style="color:var(--danger)">→ Safe Page</small></div>
+                    </div>
+                    <button class="btn btn-primary" onclick="createLink()">🚀 Create Short Link</button>
+                    <div id="createResult" class="hidden" style="margin-top:16px;background:#F0FDF4;border:2px solid var(--success);border-radius:12px;padding:16px">
+                        <p style="font-weight:700;color:#065F46">✅ Link Created Successfully!</p>
+                        <div class="copy-row" style="margin-top:8px">
+                            <input type="text" id="shortUrlInput" readonly>
+                            <button class="btn btn-success btn-sm" onclick="copyShortUrl()">📋 Copy</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- LINKS TAB -->
+            <div id="linksTab" class="hidden">
+                <div class="card">
+                    <div class="card-header">📋 My Links <span style="font-weight:400;font-size:0.8em;color:var(--gray)" id="linkCount"></span></div>
+                    <div class="table-container">
+                        <table>
+                            <thead><tr><th>Short Link</th><th>Destination</th><th>👤 Human</th><th>🤖 Bot</th><th>📊 Total</th><th>Action</th></tr></thead>
+                            <tbody id="linksTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ANALYTICS TAB -->
+            <div id="analyticsTab" class="hidden">
+                <div class="input-group" style="max-width:400px">
+                    <label>Enter Short Code for Analytics</label>
+                    <div style="display:flex;gap:8px">
+                        <input type="text" id="analyticsCode" placeholder="e.g., abc123">
+                        <button class="btn btn-primary btn-sm" onclick="loadAnalytics()">🔍 Load</button>
+                    </div>
+                </div>
+                
+                <div id="analyticsContent" class="hidden">
+                    <!-- Overview -->
+                    <div class="grid-4" style="margin-bottom:20px">
+                        <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-value" id="aTotal">0</div><div class="stat-label">Total Clicks</div></div>
+                        <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" style="color:var(--success)" id="aHuman">0</div><div class="stat-label">Human Clicks</div><div class="stat-change up" id="aHumanRate"></div></div>
+                        <div class="stat-card"><div class="stat-icon">🤖</div><div class="stat-value" style="color:var(--danger)" id="aBot">0</div><div class="stat-label">Bot Clicks</div><div class="stat-change down" id="aBotRate"></div></div>
+                        <div class="stat-card"><div class="stat-icon">🛡️</div><div class="stat-value" id="aBlocked">0</div><div class="stat-label">Bots Blocked</div></div>
+                    </div>
+                    
+                    <div class="grid-2">
+                        <!-- Devices -->
+                        <div class="card">
+                            <div class="card-header">📱 Devices</div>
+                            <div id="deviceStats"></div>
+                        </div>
+                        <!-- Browsers -->
+                        <div class="card">
+                            <div class="card-header">🌐 Browsers</div>
+                            <div id="browserStats"></div>
+                        </div>
+                        <!-- OS -->
+                        <div class="card">
+                            <div class="card-header">💻 Operating Systems</div>
+                            <div id="osStats"></div>
+                        </div>
+                        <!-- Hourly -->
+                        <div class="card">
+                            <div class="card-header">⏰ Hourly Distribution</div>
+                            <div id="hourlyChart"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Logs -->
+                    <div class="card" style="margin-top:20px">
+                        <div class="card-header">📋 Recent Visitors (Last 30)</div>
+                        <div class="table-container">
+                            <table>
+                                <thead><tr><th>Time</th><th>Type</th><th>Device</th><th>Browser</th><th>OS</th><th>Action</th></tr></thead>
+                                <tbody id="logsTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        
     </div>
 
     <script>
         let token = localStorage.getItem('token');
-        let currentCode = '';
         let currentUser = localStorage.getItem('user') || '';
+        let currentCode = '';
         
-        if (token) { showMain(); document.getElementById('currentUser').textContent = currentUser; }
+        // Init
+        if (token) { showDashboard(); }
         
-        function showRegister() { document.getElementById('loginPage').style.display='none'; document.getElementById('regPage').style.display='block'; }
-        function showLogin() { document.getElementById('regPage').style.display='none'; document.getElementById('loginPage').style.display='block'; }
-        function showMain() { hideAll(); document.getElementById('mainPage').style.display='block'; document.getElementById('currentUser').textContent=currentUser; }
-        function showLinks() { hideAll(); document.getElementById('linksPage').style.display='block'; loadMyLinks(); }
-        function hideAll() { ['loginPage','regPage','mainPage','linksPage'].forEach(id=>document.getElementById(id).style.display='none'); }
+        function toggleAuth() {
+            document.getElementById('loginCard').classList.toggle('hidden');
+            document.getElementById('regCard').classList.toggle('hidden');
+        }
         
         async function register() {
-            const u=document.getElementById('regUser').value,p=document.getElementById('regPass').value;
-            const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-            const d=await r.json();
+            const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value;
+            const r = await fetch('/api/register', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:u,password:p})
+            });
+            const d = await r.json();
             if(d.error) return alert(d.error);
             token=d.token; currentUser=d.username;
             localStorage.setItem('token',token); localStorage.setItem('user',currentUser);
-            showMain();
+            showDashboard();
         }
         
         async function login() {
-            const u=document.getElementById('loginUser').value,p=document.getElementById('loginPass').value;
-            const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});
-            const d=await r.json();
+            const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value;
+            const r = await fetch('/api/login', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body:JSON.stringify({username:u,password:p})
+            });
+            const d = await r.json();
             if(d.error) return alert(d.error);
             token=d.token; currentUser=d.username;
             localStorage.setItem('token',token); localStorage.setItem('user',currentUser);
-            showMain();
+            showDashboard();
         }
         
-        function logout() { localStorage.clear(); token=''; hideAll(); document.getElementById('loginPage').style.display='block'; }
+        function logout() {
+            localStorage.clear(); token=''; currentUser='';
+            document.getElementById('authPage').classList.remove('hidden');
+            document.getElementById('dashPage').classList.add('hidden');
+            document.getElementById('userMenu').style.display='none';
+        }
+        
+        function showDashboard() {
+            document.getElementById('authPage').classList.add('hidden');
+            document.getElementById('dashPage').classList.remove('hidden');
+            document.getElementById('userMenu').style.display='flex';
+            document.getElementById('headerUser').textContent = currentUser;
+            document.getElementById('headerAvatar').textContent = currentUser[0].toUpperCase();
+            switchTab('create');
+        }
+        
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('createTab').classList.add('hidden');
+            document.getElementById('linksTab').classList.add('hidden');
+            document.getElementById('analyticsTab').classList.add('hidden');
+            document.getElementById('analyticsContent').classList.add('hidden');
+            
+            if (tab === 'create') {
+                document.querySelector('.tab:nth-child(1)').classList.add('active');
+                document.getElementById('createTab').classList.remove('hidden');
+            } else if (tab === 'links') {
+                document.querySelector('.tab:nth-child(2)').classList.add('active');
+                document.getElementById('linksTab').classList.remove('hidden');
+                loadMyLinks();
+            } else {
+                document.querySelector('.tab:nth-child(3)').classList.add('active');
+                document.getElementById('analyticsTab').classList.remove('hidden');
+            }
+        }
         
         async function createLink() {
-            const u=document.getElementById('offerUrl').value,a=document.getElementById('alias').value;
-            if(!u.startsWith('http')) return alert('Valid URL dalo');
-            const r=await fetch('/api/create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':token},body:JSON.stringify({offerPage:u,alias:a||undefined})});
-            const d=await r.json();
-            if(d.error) return alert(d.error);
-            currentCode=d.code;
-            document.getElementById('shortUrl').textContent=d.shortUrl;
-            document.getElementById('result').classList.add('show');
+            const u = document.getElementById('offerUrl').value, a = document.getElementById('alias').value;
+            if (!u.startsWith('http')) return alert('Enter valid URL');
+            const r = await fetch('/api/create', {
+                method:'POST', headers:{'Content-Type':'application/json','Authorization':token},
+                body:JSON.stringify({offerPage:u, alias:a||undefined})
+            });
+            const d = await r.json();
+            if (d.error) return alert(d.error);
+            currentCode = d.code;
+            document.getElementById('shortUrlInput').value = d.shortUrl;
+            document.getElementById('createResult').classList.remove('hidden');
         }
         
-        function copyLink(){navigator.clipboard.writeText(document.getElementById('shortUrl').textContent);alert('📋 Copied!')}
-        
-        async function deleteLink(){
-            if(!currentCode) return;
-            if(!confirm('Delete this link?')) return;
-            await fetch('/api/delete/'+currentCode,{method:'DELETE',headers:{'Authorization':token}});
-            document.getElementById('result').classList.remove('show');
-            alert('Deleted!');
+        function copyShortUrl() {
+            navigator.clipboard.writeText(document.getElementById('shortUrlInput').value);
+            alert('📋 Copied!');
         }
         
         async function loadMyLinks() {
-            showLinks();
-            const r=await fetch('/api/mylinks',{headers:{'Authorization':token}});
-            const d=await r.json();
-            let html='';
-            d.links.forEach(l=>{
-                html+=`<div class="link-card"><div class="code">/${l.code}</div><small>Offer: ${l.offerPage.substring(0,40)}...</small><div class="stats"><span>👤 ${l.humanClicks}</span><span>🤖 ${l.botClicks}</span><span>📊 ${l.totalClicks}</span></div></div>`;
+            const r = await fetch('/api/mylinks', {headers:{'Authorization':token}});
+            const d = await r.json();
+            document.getElementById('linkCount').textContent = `(${d.links.length} total)`;
+            let html = '';
+            d.links.forEach(l => {
+                html += `<tr>
+                    <td><b style="color:var(--primary)">/${l.code}</b></td>
+                    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.offerPage}</td>
+                    <td><span class="badge badge-success">👤 ${l.humanClicks}</span></td>
+                    <td><span class="badge badge-danger">🤖 ${l.botClicks}</span></td>
+                    <td><b>${l.totalClicks}</b></td>
+                    <td>
+                        <button class="btn btn-outline btn-sm" onclick="viewAnalytics('${l.code}')">📊</button>
+                        <button class="btn btn-danger btn-sm" onclick="delLink('${l.code}')">🗑️</button>
+                    </td>
+                </tr>`;
             });
-            document.getElementById('linksList').innerHTML=html||'<p style="font-size:12px;color:#999">No links yet</p>';
+            document.getElementById('linksTableBody').innerHTML = html || '<tr><td colspan="6" style="text-align:center;color:var(--gray)">No links yet</td></tr>';
+        }
+        
+        function viewAnalytics(code) {
+            document.getElementById('analyticsCode').value = code;
+            switchTab('analytics');
+            loadAnalytics();
+        }
+        
+        async function delLink(code) {
+            if (!confirm('Delete /'+code+'?')) return;
+            await fetch('/api/delete/'+code, {method:'DELETE',headers:{'Authorization':token}});
+            loadMyLinks();
+        }
+        
+        async function loadAnalytics() {
+            const code = document.getElementById('analyticsCode').value.trim();
+            if (!code) return alert('Enter short code');
+            const r = await fetch('/api/analytics/'+code, {headers:{'Authorization':token}});
+            const d = await r.json();
+            if (d.error) return alert(d.error);
+            
+            document.getElementById('analyticsContent').classList.remove('hidden');
+            
+            // Overview
+            document.getElementById('aTotal').textContent = d.overview.totalClicks;
+            document.getElementById('aHuman').textContent = d.overview.humanClicks;
+            document.getElementById('aBot').textContent = d.overview.botClicks;
+            document.getElementById('aBlocked').textContent = d.overview.botClicks;
+            document.getElementById('aHumanRate').textContent = d.overview.humanRate + '% Human';
+            document.getElementById('aBotRate').textContent = d.overview.botRate + '% Bot';
+            
+            // Devices
+            let devHtml = '';
+            const devs = d.devices || {};
+            const devColors = {Mobile:'#10B981', Desktop:'#4F46E5', Tablet:'#F59E0B'};
+            for (let [name, count] of Object.entries(devs)) {
+                const pct = d.overview.totalClicks > 0 ? Math.round((count/d.overview.totalClicks)*100) : 0;
+                devHtml += `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:0.85em"><span>${name}</span><span>${count} (${pct}%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${devColors[name]||'#818CF8'}"></div></div></div>`;
+            }
+            document.getElementById('deviceStats').innerHTML = devHtml || '<p style="color:var(--gray);font-size:0.85em">No data</p>';
+            
+            // Browsers
+            let broHtml = '';
+            const bros = d.browsers || {};
+            for (let [name, count] of Object.entries(bros)) {
+                const pct = d.overview.totalClicks > 0 ? Math.round((count/d.overview.totalClicks)*100) : 0;
+                broHtml += `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:0.85em"><span>${name}</span><span>${count} (${pct}%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--primary-light)"></div></div></div>`;
+            }
+            document.getElementById('browserStats').innerHTML = broHtml || '<p style="color:var(--gray);font-size:0.85em">No data</p>';
+            
+            // OS
+            let osHtml = '';
+            const oss = d.os || {};
+            for (let [name, count] of Object.entries(oss)) {
+                const pct = d.overview.totalClicks > 0 ? Math.round((count/d.overview.totalClicks)*100) : 0;
+                osHtml += `<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-size:0.85em"><span>${name}</span><span>${count} (${pct}%)</span></div><div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:var(--warning)"></div></div></div>`;
+            }
+            document.getElementById('osStats').innerHTML = osHtml || '<p style="color:var(--gray);font-size:0.85em">No data</p>';
+            
+            // Hourly
+            let hourHtml = '<div class="bar-chart">';
+            const hourly = d.hourly || {};
+            const maxHour = Math.max(1, ...Object.values(hourly));
+            for (let h = 0; h < 24; h++) {
+                const val = hourly[h] || 0;
+                const hPct = Math.round((val/maxHour)*100);
+                hourHtml += `<div class="bar" style="height:${Math.max(hPct,4)}%" title="${h}:00 - ${val} clicks"><span class="bar-label">${h}</span></div>`;
+            }
+            hourHtml += '</div>';
+            document.getElementById('hourlyChart').innerHTML = hourHtml;
+            
+            // Logs
+            let logHtml = '';
+            const logs = d.recentLogs || [];
+            logs.forEach(l => {
+                const typeBadge = l.isBot ? '<span class="badge badge-danger">🤖 Bot</span>' : '<span class="badge badge-success">👤 Human</span>';
+                const time = new Date(l.time).toLocaleString();
+                logHtml += `<tr>
+                    <td style="font-size:0.8em">${time}</td>
+                    <td>${typeBadge}</td>
+                    <td>${l.device || '-'}</td>
+                    <td>${l.browser || '-'}</td>
+                    <td>${l.os || '-'}</td>
+                    <td>${l.isBot ? '🛡️ Safe Page' : '💰 Offer Page'}</td>
+                </tr>`;
+            });
+            document.getElementById('logsTableBody').innerHTML = logHtml || '<tr><td colspan="6" style="text-align:center;color:var(--gray)">No visits yet</td></tr>';
         }
     </script>
 </body>
