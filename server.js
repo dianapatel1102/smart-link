@@ -6,10 +6,12 @@ const { MongoClient } = require("mongodb");
 
 // ✅ TUMHARA MONGODB URL
 const MONGO_URL = "mongodb+srv://farhad110222_db_user:3EDIJRK8EZ1ymlUZ@gourav.5cjns7c.mongodb.net/smartlink?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true";
-
-app.use(express.static("public"));
-app.use(express.json());
-
+const client = new MongoClient(MONGO_URL, {
+  tls: true,
+  tlsAllowInvalidCertificates: false,
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000
+});
 const client = new MongoClient(MONGO_URL);
 let db, usersCol, linksCol, analyticsCol;
 
