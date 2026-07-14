@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const { MongoClient } = require("mongodb");
 
 // ✅ TUMHARA MONGODB URL
-const MONGO_URL = "mongodb+srv://farhad110222_db_user:3EDIJRK8EZ1ymlUZ@gourav.5cjns7c.mongodb.net/?retryWrites=true&w=majority&appName=gourav";
+const MONGO_URL = "mongodb+srv://farhad110222_db_user:3EDIJRK8EZ1ymlUZ@gourav.5cjns7c.mongodb.net/smartlink?retryWrites=true&w=majority&tls=true&tlsAllowInvalidCertificates=true";
 
 app.use(express.static("public"));
 app.use(express.json());
